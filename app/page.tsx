@@ -64,33 +64,57 @@ export default function EcoRouteOptimizer() {
     setShowResults(false)
   
     // TODO: Replace this with real API later
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-  
-    // Fake traffic delay (for now)
-    const updatedRoutes = sampleRoutesBase.map((route) => {
-      const trafficDelay = Math.floor(Math.random() * 400)
-  
-      let congestionLevel = "LOW"
-      if (trafficDelay > 300) congestionLevel = "HIGH"
-      else if (trafficDelay > 120) congestionLevel = "MEDIUM"
-  
-      return {
-        ...route,
-      
-        // 🚀 ADD THESE (IMPORTANT)
-        distance: `${10 + Math.floor(Math.random() * 10)} km`,
-      
-        duration: `${15 + Math.floor(trafficDelay / 60)} mins`,
-      
-        fuel: `${(1 + Math.random()).toFixed(2)} L`,
-      
-        co2: `${(2 + Math.random()).toFixed(2)} kg`,
-      
-        // 🚦 Your traffic logic
-        trafficScore: trafficDelay,
-        congestionLevel: congestionLevel,
-      }
-    })
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_MAPPLS_API_KEY
+    
+      // TEMP: fixed coordinates (we'll fix input later)
+      const origin = "12.9716,77.5946"   // Bangalore
+      const dest = "13.0827,80.2707"     // Chennai
+    
+      const url = `https://apis.mappls.com/advancedmaps/v1/${apiKey}/route_adv/driving/${origin};${dest}?alternatives=true`
+    
+      const res = await fetch(url)
+      const data = await res.json()
+    
+      const updatedRoutes = data.routes.map((route: any, index: number) => {
+        const distanceKm = (route.distance / 1000).toFixed(1)
+        const durationMin = Math.round(route.duration / 60)
+    
+        const fuelLiters = calculateFuelLiters(Number(distanceKm))
+        const co2Kg = calculateCo2Kg(fuelLiters)
+    
+        return {
+          id: `route-${index}`,
+          name: `Route ${String.fromCharCode(65 + index)}`,
+    
+          distance: `${distanceKm} km`,
+          duration: `${durationMin} mins`,
+    
+          fuel: `${formatNumber(fuelLiters)} L`,
+          co2: `${formatNumber(co2Kg)} kg`,
+    
+          trafficScore: route.duration,
+          congestionLevel: "LIVE",
+    
+          isBestEco: false,
+        }
+      })
+    
+      const best = updatedRoutes.reduce((min, r) => {
+        return Number.parseFloat(r.co2) < Number.parseFloat(min.co2) ? r : min
+      }, updatedRoutes[0])
+    
+      const finalRoutes = updatedRoutes.map((r) => ({
+        ...r,
+        isBestEco: r.id === best.id,
+      }))
+    
+      setRoutes(finalRoutes)
+      setSelectedRoute(best.id)
+      setShowResults(true)
+    } catch (err) {
+      console.error(err)
+    }
   
     const best = updatedRoutes.reduce((min, r) => {
       const rCo2 = Number.parseFloat(r.co2)
