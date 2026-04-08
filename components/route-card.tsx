@@ -13,6 +13,7 @@ interface RouteCardProps {
   isBestEco?: boolean
   isSelected?: boolean
   onClick?: () => void
+  congestionLevel?: string
 }
 
 export function RouteCard({
@@ -24,6 +25,7 @@ export function RouteCard({
   isBestEco = false,
   isSelected = false,
   onClick,
+  congestionLevel,
 }: RouteCardProps) {
   return (
     <Card
@@ -59,6 +61,12 @@ export function RouteCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+      <div>
+  <p className="text-xs text-muted-foreground uppercase">Traffic</p>
+  <p className="text-sm font-semibold">
+    {congestionLevel || "N/A"}
+  </p>
+</div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Distance</p>
