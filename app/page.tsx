@@ -45,9 +45,10 @@ function buildRoute(id: string, name: string, distanceKm: number): RouteData {
   }
 }
 
-const sampleRoutesBase: RouteData[] = [
-  buildRoute("A", "Route A", 20),
-  buildRoute("B", "Route B", 15),
+const sampleRoutesBase = [
+  { id: "A", name: "Route A", isBestEco: false },
+  { id: "B", name: "Route B", isBestEco: true },
+  { id: "C", name: "Route C", isBestEco: false },
 ]
 
 export default function EcoRouteOptimizer() {
@@ -75,8 +76,19 @@ export default function EcoRouteOptimizer() {
   
       return {
         ...route,
+      
+        // 🚀 ADD THESE (IMPORTANT)
+        distance: `${10 + Math.floor(Math.random() * 10)} km`,
+      
+        duration: `${15 + Math.floor(trafficDelay / 60)} mins`,
+      
+        fuel: `${(1 + Math.random()).toFixed(2)} L`,
+      
+        co2: `${(2 + Math.random()).toFixed(2)} kg`,
+      
+        // 🚦 Your traffic logic
         trafficScore: trafficDelay,
-        congestionLevel,
+        congestionLevel: congestionLevel,
       }
     })
   
