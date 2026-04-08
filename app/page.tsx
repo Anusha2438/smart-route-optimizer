@@ -14,6 +14,8 @@ interface RouteData {
   fuel: string
   co2: string
   isBestEco: boolean
+  trafficScore?: number
+  congestionLevel?: string
 }
 
 function calculateFuelLiters(distanceKm: number) {
@@ -59,27 +61,41 @@ export default function EcoRouteOptimizer() {
   const handleFindRoutes = async () => {
     setIsLoading(true)
     setShowResults(false)
-    
-    // Simulate API call
+  
+    // TODO: Replace this with real API later
     await new Promise((resolve) => setTimeout(resolve, 1500))
-    
-    const best = sampleRoutesBase.reduce((min, r) => {
-      const co2 = Number.parseFloat(r.co2)
+  
+    // Fake traffic delay (for now)
+    const updatedRoutes = sampleRoutesBase.map((route) => {
+      const trafficDelay = Math.floor(Math.random() * 400)
+  
+      let congestionLevel = "LOW"
+      if (trafficDelay > 300) congestionLevel = "HIGH"
+      else if (trafficDelay > 120) congestionLevel = "MEDIUM"
+  
+      return {
+        ...route,
+        trafficScore: trafficDelay,
+        congestionLevel,
+      }
+    })
+  
+    const best = updatedRoutes.reduce((min, r) => {
+      const rCo2 = Number.parseFloat(r.co2)
       const minCo2 = Number.parseFloat(min.co2)
-      return co2 < minCo2 ? r : min
-    }, sampleRoutesBase[0])
+      return rCo2 < minCo2 ? r : min
+    }, updatedRoutes[0])
 
-    const sampleRoutes: RouteData[] = sampleRoutesBase.map((r) => ({
+    const finalRoutes = updatedRoutes.map((r) => ({
       ...r,
       isBestEco: r.id === best.id,
     }))
 
-    setRoutes(sampleRoutes)
+    setRoutes(finalRoutes)
     setSelectedRoute(best.id)
     setShowResults(true)
     setIsLoading(false)
   }
-
   const co2Saved =
     showResults && routes.length > 0
       ? `${formatNumber(

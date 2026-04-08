@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -22,6 +23,7 @@ export function RouteInput({
   onFindRoutes,
   isLoading = false,
 }: RouteInputProps) {
+  const [vehicle, setVehicle] = useState("car");
   return (
     <Card className="border-border">
       <CardContent className="p-6">
@@ -61,6 +63,23 @@ export function RouteInput({
               />
             </div>
           </div>
+          <div className="flex-1 space-y-2 w-full">
+  <label className="text-xs text-muted-foreground uppercase tracking-wider">
+    Vehicle Type
+  </label>
+
+  <select
+    value={vehicle}
+    onChange={(e) => setVehicle(e.target.value)}
+    className="w-full p-2 border rounded bg-input border-border"
+  >
+    <option value="car">Car</option>
+    <option value="bike">Bike</option>
+    <option value="truck">Truck</option>
+    <option value="bus">Bus</option>
+    <option value="walk">Walking</option>
+  </select>
+</div>
           
           <Button
             onClick={onFindRoutes}
